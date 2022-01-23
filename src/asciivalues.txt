@@ -1,0 +1,51 @@
+null =
+
+quote = "’"
+
+ditto = """
+
+back = "\"
+
+octal = "0" | "1" | ... | "7"
+
+octch = back octal (octal | null) (octal | null)
+
+digit = "0" | "1" | ... | "9"
+
+alpha = "a" | ... | "z" | "A" | ... | "Z" | "_"
+
+schar = any ascii character except quote, ditto, carriage return and back
+
+char = 
+        back schar
+        back ditto
+        null schar
+        null ditto
+        back back   | 
+        back quote  |
+        octch
+
+str = ((back | null) (schar | quote)) | back back
+str = back schar
+      back quote
+      back back
+      null 
+| back ditto | octch
+
+token = digit+ # number
+
+| alpha (alpha | digit)* # ident
+
+| quote char quote # char
+
+| ditto str+ ditto # string
+
+| "(" | ")" | "," | "." | ":" | ";" | "?" | "[" | "]"
+
+| "{" | "}" | "~” | "&&" | "||" | "++" | "--" | "->"
+
+| ("|" | "ˆ" | "&" | "+" | "-" | "%" | "*" | "/" | "=" | "!" | ">" | ">>" | "<" | "<<") ("=" | null)
+
+Blanks, tabs, newlines, and comments (enclosed between "/*" and "*/", and "//") are ignored between tokens, and escaped newlines are ignored in
+ strings. Note that defines, includes, and hex, long, and real constants are not handled. You should comment your program so that others 
+ (e.g. the grader) can understand it.
