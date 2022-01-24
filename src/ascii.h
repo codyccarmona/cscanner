@@ -6,6 +6,7 @@ enum Ascii{
     BACKSPACE      = 8,
     BACK           = 92,
     DITTO          = 34,
+    AMP            = 38,
     QUOTE          = 39,
     ASTERICK       = 42,
     LF             = 10,
@@ -17,7 +18,7 @@ enum Ascii{
     SEVEN          = 55
 };
 bool iscomment(int i, int j){
-    return i == BACK && j == BACK || j == ASTERICK;
+    return i == FORWARD && (j == FORWARD || j == ASTERICK);
 }
 bool is_skippable_between_tokens(int i){
     return i == SPACE || i == TAB || i == LF || i == ASCII_NULL; 
@@ -35,6 +36,3 @@ bool is_schar(int i) {
 
 | "{" | "}" | "~” | "&&" | "||" | "++" | "--" | "->"
 */
-bool istoken(int i, int j){
-    
-}
