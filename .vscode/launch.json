@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
             "args": [
-                "<", "${fileDirname}\\..\\sample\\newline-cont.c"
+                "<", "${fileDirname}\\..\\test\\hello.cpp"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

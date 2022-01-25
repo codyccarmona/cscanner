@@ -1,7 +1,6 @@
 /*
  *  STUDENT C++ TEMPLATE FOR CSCAN PROJECT
  */
-
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
@@ -11,13 +10,11 @@
 #include <algorithm>
 #include <vector>
 #include "ascii.h"
-
 #define MAXTOK 256      /* maximum token size */
 #define ident_key "ident"
 #define str_key "string"
 #define char_key "char"
 #define digit_key "digit"
-
 int cur;                                                    /* current character being processed */
 int peek;                                                   /* next charcter to be processed */
 int line_number = 1;                                        /* hold current line number */
@@ -29,7 +26,6 @@ struct map_sort_comp{                                       /* used to quickly s
         if (l.second != r.second) {
             return l.second > r.second;
         }
-
         return l.first > r.first;
     }
 };
@@ -43,7 +39,6 @@ enum State{                             /* arbitrary values to represent states 
     F = 6,
     REJECT = EOF,
 };
-
 /**
  * @param State current state of NFA (only ints defined in State enum handled)
  * @param int   current value to check against transition functions
@@ -55,7 +50,7 @@ State move(State s, int i, bool str){
     switch(s){
         case A:
             if(i == BACK) return C;
-            else if((is_schar(i) && i != LF) || (!str && i == DITTO) || (str && i == QUOTE)) return B;
+            else if(is_schar(i) || (!str && i == DITTO) || (str && i == QUOTE)) return B;
             break;
         case B:
             break;
@@ -87,7 +82,6 @@ bool sortvec(const std::pair<std::string, int> &l, const std::pair<std::string, 
 bool is_accept_state(State state){
     return state == State::B || state == State::D || state == State::E;
 }
-
 /* Advances to next byte from stdin */
 void advance(int num_advances = 1){
     while(num_advances > 0){
@@ -99,12 +93,10 @@ void advance(int num_advances = 1){
         num_advances--;
     }
 }
-
 /* Returns true is i is ascii value of skippalble character */
 bool is_skippable(int i){
     return isspace(i) && (i == LF || i == TAB || i == SPACE);
 }
-
 // Blanks, tabs, newlines, and comments (enclosed between */, /*, //) are ignored between tokens */
 int skip() {
     if(is_skippable(cur)){
@@ -114,7 +106,7 @@ int skip() {
     if(iscomment(cur, peek)){
         if(peek == FORWARD){
             // Comment line
-            while(cur != LF && cur != EOF && cur != BACK)
+            while(cur != LF && cur != EOF)
                 advance();
             if(cur == LF)
                 advance();
@@ -131,7 +123,6 @@ int skip() {
     skip();
   return cur;
 }
-
 /* Returns true if int is ascii value of one character tokens defined in requirements */
 bool is_single_char_token(int i){
     return i == '(' || i == ')' || i == ',' ||
@@ -139,20 +130,17 @@ bool is_single_char_token(int i){
            i == '?' || i == '[' || i == ']' ||      
            i == '{' || i == '}' || i == '~';
 }
-
 /* Returns true if int matches a character that, when repeated, is a valid token */
 bool is_repeatable_operator(int i){
     return i == '&' || i == '|' || i == '+' || i == '-' || i == '=' || i == '<' || i == '>';
 }
-
 /* Returns true if int matches ascii value of operator */
 bool isoperator(int i){
     return i == '&' || i == '|' || i == '+' ||
            i == '^' || i == '%' || i == '*' || 
            i == '/' || i == '=' || i == '!' || 
-           i == '>' || i == '<';
+           i == '>' || i == '<' || i == '-';
 }
-
 /* uses struct to create set obj with sorted keys and counts, then prints them */
 void print_token_summary(){
     std::sort(token_count.begin(), token_count.end(), sortvec);
@@ -163,7 +151,6 @@ void print_token_summary(){
         printf("%21s %5d\n", itr->first.begin(), itr->second);
     }
 }
-
 /* called by scan when it encounters valid token */
 void record_token(std::string key){
     auto itr = token_count.begin();
@@ -176,11 +163,9 @@ void record_token(std::string key){
     if(itr == token_count.end())
         token_count.push_back(std::pair<std::string, int>(key, 1));
 }
-
 /* Find a token and store the chars into lexeme buffer */
 int scan(char *lexeme) {
     int i = 0;
-
     /* skip over whitespaces, as well as comments and check for EOF */
     if (skip() == EOF)
         return EOF;
@@ -202,7 +187,7 @@ int scan(char *lexeme) {
             lexeme[i++] = cur;
             advance();
             /* Check for char token */
-            if(cur == QUOTE){
+            if(lexeme[i - 1] == QUOTE){
                 while(cur != QUOTE && cur != EOF && state != REJECT){
                     lexeme[i++] = cur;
                     state = move(state, cur, false);
@@ -214,7 +199,7 @@ int scan(char *lexeme) {
                     advance();
                 }
                 else{
-                    std::fprintf(stderr ,"missing %c for %s on line %i", QUOTE, lexeme, line_number);
+                    std::fprintf(stderr ,"missing %c for %s on line %i\n", QUOTE, lexeme, line_number); fflush(stderr);
                     lexeme[0] = 0;
                 }
             }
@@ -234,7 +219,8 @@ int scan(char *lexeme) {
                 }
                 else{ 
                     //missing " for "This is a test with conton line 9
-                    std::fprintf(stderr ,"missing %c for %s on line %i\n", DITTO, lexeme, (lexeme[i - 1] == LF ? line_number - 1 : line_number));
+                    //std::cerr << "missing \" for" <<  lexeme << " on line " << line_number << std::endl;
+                    std::fprintf(stderr ,"missing %c for %s on line %i\n", DITTO, lexeme, line_number); fflush(stderr);
                     lexeme[0] = 0;
                 }                
             }
@@ -276,26 +262,25 @@ int scan(char *lexeme) {
             return i;
         }
         else{
-            printf("illegal characer: %c on line %i", cur, line_number);
+            std::fprintf(stderr ,"illegal characer: %c on line %i\n", cur, line_number); fflush(stderr);
+            //std::sprintf(lexeme ,"illegal characer: %c on line %i", cur, line_number);
             lexeme[0] = 0;
             advance();
         }
     }
     return 0;
 }
-
 int main(int argc, char *argv[])
 {
     char lexeme[MAXTOK];
     int  result;
-
     /* setup for scanning */
     cur = peek = std::fgetc(stdin);
     if (cur != EOF)
         peek = std::fgetc(stdin);
-
     while ((result = scan(lexeme)) != EOF) {
-        std::cout << lexeme << std::endl;
+        if(lexeme[0] != 0)
+            std::cout << lexeme << std::endl; fflush(stdout);
     }
     print_token_summary();
     return 0;
